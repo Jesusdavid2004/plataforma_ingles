@@ -34,6 +34,14 @@ const words = [
   { english: "Water", spanish: "Agua", category: "everyday", label: "Día a día", pronunciation: "ˈwɔːtər" },
   { english: "Book", spanish: "Libro", category: "everyday", label: "Día a día", pronunciation: "bʊk" },
   { english: "Friend", spanish: "Amigo / amiga", category: "everyday", label: "Día a día", pronunciation: "frend" },
+  { english: "Apple", spanish: "Manzana", category: "food", label: "Comida", pronunciation: "ˈæpəl" },
+  { english: "Bread", spanish: "Pan", category: "food", label: "Comida", pronunciation: "bred" },
+  { english: "Coffee", spanish: "Café", category: "food", label: "Comida", pronunciation: "ˈkɔːfi" },
+  { english: "Breakfast", spanish: "Desayuno", category: "food", label: "Comida", pronunciation: "ˈbrekfəst" },
+  { english: "School", spanish: "Escuela", category: "places", label: "Lugares", pronunciation: "skuːl" },
+  { english: "House", spanish: "Casa", category: "places", label: "Lugares", pronunciation: "haʊs" },
+  { english: "Station", spanish: "Estación", category: "places", label: "Lugares", pronunciation: "ˈsteɪʃən" },
+  { english: "Restaurant", spanish: "Restaurante", category: "places", label: "Lugares", pronunciation: "ˈrestərɑːnt" },
 ];
 
 const quiz = [
