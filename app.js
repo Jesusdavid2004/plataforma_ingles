@@ -51,7 +51,9 @@ const quiz = [
 ];
 
 const progressKey = "ingles-a-tu-ritmo-learned-letters";
+const favoritesKey = "ingles-a-tu-ritmo-favorite-words";
 let learnedLetters = new Set(JSON.parse(localStorage.getItem(progressKey) || "[]"));
+let favoriteWords = new Set(JSON.parse(localStorage.getItem(favoritesKey) || "[]"));
 let selectedLetter = 0;
 let quizIndex = 0;
 let quizScore = 0;
@@ -106,21 +108,24 @@ function normalizeText(value) {
 function renderWords() {
   const normalizedQuery = normalizeText(vocabularyQuery.trim());
   const visibleWords = words.filter((word) => {
-    const matchesCategory = vocabularyCategory === "all" || word.category === vocabularyCategory;
+    const matchesCategory = vocabularyCategory === "all"
+      || (vocabularyCategory === "favorites" ? favoriteWords.has(word.english) : word.category === vocabularyCategory);
     const searchableText = normalizeText(`${word.english} ${word.spanish} ${word.label}`);
     return matchesCategory && searchableText.includes(normalizedQuery);
   });
   document.querySelector("#vocabulary-count").textContent = `${visibleWords.length} ${visibleWords.length === 1 ? "PALABRA" : "PALABRAS"}`;
+  const emptyMessage = vocabularyCategory === "favorites" && favoriteWords.size === 0 && !normalizedQuery
+    ? "Aún no tienes palabras favoritas. Guarda una con el botón de estrella."
+    : "No encontramos palabras que coincidan. Prueba otra búsqueda o categoría.";
   document.querySelector("#word-grid").innerHTML = visibleWords.length ? visibleWords.map((word, index) => `
     <article class="word-card" style="animation-delay:${index * 45}ms">
-      <div class="word-top"><span class="word-category">${word.label}</span><button class="icon-button speak-button" data-say="${word.english}" aria-label="Escuchar ${word.english}">▶</button></div>
+      <div class="word-top"><span class="word-category">${word.label}</span><div class="word-actions"><button class="icon-button favorite-button${favoriteWords.has(word.english) ? " is-favorite" : ""}" data-favorite="${word.english}" type="button" aria-label="${favoriteWords.has(word.english) ? "Quitar de" : "Añadir a"} favoritas: ${word.english}" aria-pressed="${favoriteWords.has(word.english)}">${favoriteWords.has(word.english) ? "★" : "☆"}</button><button class="icon-button speak-button" data-say="${word.english}" aria-label="Escuchar ${word.english}">▶</button></div></div>
       <h3>${word.english}</h3><span class="word-translation">${word.spanish}</span>
-    </article>`).join("") : `<p class="empty-state">No encontramos palabras que coincidan. Prueba otra búsqueda o categoría.</p>`;
-  bindSpeakButtons();
+    </article>`).join("") : `<p class="empty-state">${emptyMessage}</p>`;
 }
 
 function bindSpeakButtons() {
-  document.querySelectorAll(".speak-button").forEach((button) => {
+  document.querySelectorAll("#grammar-view .speak-button").forEach((button) => {
     button.addEventListener("click", () => speak(button.dataset.say));
   });
 }
@@ -192,7 +197,21 @@ document.querySelector("#vocabulary-search").addEventListener("input", (event) =
   vocabularyQuery = event.target.value;
   renderWords();
 });
+document.querySelector("#word-grid").addEventListener("click", (event) => {
+  const button = event.target.closest("button");
+  if (button?.classList.contains("speak-button")) {
+    speak(button.dataset.say);
+    return;
+  }
+  if (!button?.classList.contains("favorite-button")) return;
+  const word = button.dataset.favorite;
+  if (favoriteWords.has(word)) favoriteWords.delete(word);
+  else favoriteWords.add(word);
+  localStorage.setItem(favoritesKey, JSON.stringify([...favoriteWords]));
+  renderWords();
+});
 renderLetters();
 renderWords();
 renderQuiz();
+bindSpeakButtons();
 selectLetter(0);
