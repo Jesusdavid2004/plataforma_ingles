@@ -52,12 +52,15 @@ const quiz = [
 
 const progressKey = "ingles-a-tu-ritmo-learned-letters";
 const favoritesKey = "ingles-a-tu-ritmo-favorite-words";
+const quizHistoryKey = "ingles-a-tu-ritmo-quiz-history";
 let learnedLetters = new Set(JSON.parse(localStorage.getItem(progressKey) || "[]"));
 let favoriteWords = new Set(JSON.parse(localStorage.getItem(favoritesKey) || "[]"));
+let quizHistory = JSON.parse(localStorage.getItem(quizHistoryKey) || '{"attempts":0,"bestScore":0,"lastScore":0}');
 let selectedLetter = 0;
 let quizIndex = 0;
 let quizScore = 0;
 let quizAnswered = false;
+let quizResultSaved = false;
 let vocabularyQuery = "";
 let vocabularyCategory = "all";
 
@@ -130,13 +133,34 @@ function bindSpeakButtons() {
   });
 }
 
+function renderQuizHistory() {
+  const history = document.querySelector("#quiz-history");
+  if (!quizHistory.attempts) {
+    history.innerHTML = "<p>Completa la práctica para guardar tu primer resultado.</p>";
+    return;
+  }
+  history.innerHTML = `
+    <div><span>MEJOR RESULTADO</span><strong>${quizHistory.bestScore} / ${quiz.length}</strong></div>
+    <div><span>ÚLTIMO INTENTO</span><strong>${quizHistory.lastScore} / ${quiz.length}</strong></div>
+    <div><span>INTENTOS COMPLETADOS</span><strong>${quizHistory.attempts}</strong></div>`;
+}
+
 function renderQuiz() {
   const panel = document.querySelector("#quiz-panel");
   if (quizIndex >= quiz.length) {
+    if (!quizResultSaved) {
+      quizHistory.attempts += 1;
+      quizHistory.lastScore = quizScore;
+      quizHistory.bestScore = Math.max(quizHistory.bestScore, quizScore);
+      localStorage.setItem(quizHistoryKey, JSON.stringify(quizHistory));
+      quizResultSaved = true;
+      renderQuizHistory();
+    }
     panel.innerHTML = `<div class="quiz-result"><div class="quiz-result-mark">✳</div><h2>¡Buen trabajo!</h2><p>Respondiste correctamente ${quizScore} de ${quiz.length} preguntas.</p><button class="quiz-next" id="restart-quiz" type="button">Intentar de nuevo</button></div>`;
     document.querySelector("#restart-quiz").addEventListener("click", () => {
       quizIndex = 0;
       quizScore = 0;
+      quizResultSaved = false;
       renderQuiz();
     });
     return;
@@ -212,6 +236,7 @@ document.querySelector("#word-grid").addEventListener("click", (event) => {
 });
 renderLetters();
 renderWords();
+renderQuizHistory();
 renderQuiz();
 bindSpeakButtons();
 selectLetter(0);

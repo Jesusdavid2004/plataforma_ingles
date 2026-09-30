@@ -149,6 +149,11 @@ h1 { margin-bottom: 9px; font-family: var(--serif); font-size: clamp(32px, 3.2vw
 .lesson-reminder strong { color: #665632; }
 .lesson-reminder em { color: #645b43; }
 .quiz-panel { max-width: 700px; padding: 23px 26px; border: 1px solid var(--line); border-radius: 5px; background: #fff; }
+.quiz-history { display: flex; flex-wrap: wrap; gap: 12px; max-width: 700px; margin: 0 0 12px; padding: 14px 17px; border: 1px solid #e5eae3; border-radius: 5px; background: #fff; }
+.quiz-history > div { display: grid; flex: 1; gap: 5px; }
+.quiz-history span { color: #929d93; font-size: 8px; font-weight: 700; letter-spacing: .7px; }
+.quiz-history strong { color: var(--green); font-family: var(--serif); font-size: 18px; }
+.quiz-history p { margin: 0; color: #78837b; font-size: 11px; }
 .quiz-progress { display: flex; align-items: center; justify-content: space-between; color: #89948b; font-size: 10px; }
 .quiz-progress-track { height: 4px; margin: 12px 0 25px; overflow: hidden; border-radius: 4px; background: #e9eee7; }
 .quiz-progress-track span { display: block; height: 100%; border-radius: inherit; background: var(--green); transition: width .25s ease; }
