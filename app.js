@@ -56,6 +56,8 @@ let selectedLetter = 0;
 let quizIndex = 0;
 let quizScore = 0;
 let quizAnswered = false;
+let vocabularyQuery = "";
+let vocabularyCategory = "all";
 
 const letterGrid = document.querySelector("#letter-grid");
 
@@ -97,13 +99,23 @@ function speak(text) {
   window.speechSynthesis.speak(utterance);
 }
 
-function renderWords(filter = "all") {
-  const visibleWords = filter === "all" ? words : words.filter((word) => word.category === filter);
-  document.querySelector("#word-grid").innerHTML = visibleWords.map((word, index) => `
+function normalizeText(value) {
+  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase();
+}
+
+function renderWords() {
+  const normalizedQuery = normalizeText(vocabularyQuery.trim());
+  const visibleWords = words.filter((word) => {
+    const matchesCategory = vocabularyCategory === "all" || word.category === vocabularyCategory;
+    const searchableText = normalizeText(`${word.english} ${word.spanish} ${word.label}`);
+    return matchesCategory && searchableText.includes(normalizedQuery);
+  });
+  document.querySelector("#vocabulary-count").textContent = `${visibleWords.length} ${visibleWords.length === 1 ? "PALABRA" : "PALABRAS"}`;
+  document.querySelector("#word-grid").innerHTML = visibleWords.length ? visibleWords.map((word, index) => `
     <article class="word-card" style="animation-delay:${index * 45}ms">
       <div class="word-top"><span class="word-category">${word.label}</span><button class="icon-button speak-button" data-say="${word.english}" aria-label="Escuchar ${word.english}">▶</button></div>
       <h3>${word.english}</h3><span class="word-translation">${word.spanish}</span>
-    </article>`).join("");
+    </article>`).join("") : `<p class="empty-state">No encontramos palabras que coincidan. Prueba otra búsqueda o categoría.</p>`;
   bindSpeakButtons();
 }
 
@@ -172,7 +184,14 @@ document.querySelectorAll(".nav-item").forEach((button) => {
 });
 
 document.querySelector("#listen-letter").addEventListener("click", () => speak(letters[selectedLetter].letter));
-document.querySelector("#vocabulary-filter").addEventListener("change", (event) => renderWords(event.target.value));
+document.querySelector("#vocabulary-filter").addEventListener("change", (event) => {
+  vocabularyCategory = event.target.value;
+  renderWords();
+});
+document.querySelector("#vocabulary-search").addEventListener("input", (event) => {
+  vocabularyQuery = event.target.value;
+  renderWords();
+});
 renderLetters();
 renderWords();
 renderQuiz();
